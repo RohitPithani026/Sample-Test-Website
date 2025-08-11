@@ -359,6 +359,12 @@
                 <button onclick="testFormSubmission()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Test Form Submit
                 </button>
+                <button onclick="forceCheckThriveStack()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Force Check ThriveStack
+                </button>
+                <button onclick="testInviteTracking()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Test Invite Tracking
+                </button>
                 <div id="debugOutput" style="margin-top: 1rem; font-family: monospace; font-size: 0.875rem; color: #6c757d;"></div>
             </div>
         </div>
@@ -405,10 +411,19 @@
                 if (thriveStack && typeof thriveStack.track === 'function') {
                     console.log('✅ ThriveStack available, tracking form submission...');
                     try {
-                        thriveStack.track('signup_form_submitted', {
-                            email: document.getElementById('email').value,
-                            source: 'website_signup'
-                        });
+                        // Track form submission using the correct ThriveStack format
+                        thriveStack.track([{
+                            "event_name": "signup_form_submitted",
+                            "properties": {
+                                "user_email": document.getElementById('email').value,
+                                "user_name": document.getElementById('name').value,
+                                "utm_campaign": "website_signup",
+                                "utm_medium": "web",
+                                "utm_source": "signup_page",
+                                "utm_term": "new_user"
+                            },
+                            "timestamp": new Date().toISOString()
+                        }]);
                         console.log('✅ Form submission tracked successfully');
                     } catch (error) {
                         console.error('❌ Error tracking form submission:', error);
@@ -429,80 +444,112 @@
                 setTimeout(() => {
                     console.log('⏰ Timeout completed, processing signup...');
                     
-                    // Track successful signup
-                    console.log('🔍 Tracking successful signup...');
+                    // Track successful signup with all required ThriveStack events
+                    console.log('🔍 Tracking successful signup with ThriveStack...');
                     const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
                     
                     if (thriveStack && typeof thriveStack.track === 'function') {
                         try {
-                            thriveStack.track('signup_completed', {
-                                email: document.getElementById('email').value,
-                                source: 'website_signup'
+                            const userEmail = document.getElementById('email').value;
+                            const userName = document.getElementById('name').value;
+                            const userId = generateUserId(); // Generate a unique user ID
+                            const accountId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your account ID
+                            const accountName = 'Your Company Name';
+                            const accountDomain = 'yourcompany.com';
+                            
+                            console.log('📝 Generated user data:', { userId, userName, userEmail, accountId });
+                            
+                            // 1. Signup Tracking Event
+                            thriveStack.track([{
+                                "event_name": "signed_up",
+                                "properties": {
+                                    "user_email": userEmail,
+                                    "user_name": userName,
+                                    "utm_campaign": "customer_success",
+                                    "utm_medium": "web",
+                                    "utm_source": "signup_page",
+                                    "utm_term": "free_trial"
+                                },
+                                "user_id": userId,
+                                "timestamp": new Date().toISOString()
+                            }]);
+                            console.log('✅ Signup event tracked successfully');
+                            
+                            // 2. Account Creation Tracking Event
+                            thriveStack.track([{
+                                "event_name": "account_created",
+                                "properties": {
+                                    "account_domain": accountDomain,
+                                    "account_id": accountId,
+                                    "account_name": accountName
+                                },
+                                "user_id": userId,
+                                "timestamp": new Date().toISOString(),
+                                "context": {
+                                    "group_id": accountId
+                                }
+                            }]);
+                            console.log('✅ Account creation event tracked successfully');
+                            
+                            // 3. User-Company Association Event
+                            thriveStack.track([{
+                                "event_name": "account_added_user",
+                                "properties": {
+                                    "account_name": accountName,
+                                    "user_email": userEmail
+                                },
+                                "user_id": userId,
+                                "timestamp": new Date().toISOString(),
+                                "context": {
+                                    "group_id": accountId
+                                }
+                            }]);
+                            console.log('✅ User-company association event tracked successfully');
+                            
+                            // 4. Feature Usage Tracking Event (signup completion)
+                            thriveStack.track([{
+                                "event_name": "feature_used",
+                                "properties": {
+                                    "feature_name": "user_registration",
+                                    "user_role": "new_user"
+                                },
+                                "user_id": userId,
+                                "timestamp": new Date().toISOString(),
+                                "context": {
+                                    "group_id": accountId
+                                }
+                            }]);
+                            console.log('✅ Feature usage event tracked successfully');
+                            
+                            // Store user data in localStorage for dashboard access
+                            console.log('💾 Storing data in localStorage...');
+                            localStorage.setItem('thrivestack_user_id', userId);
+                            localStorage.setItem('thrivestack_user_email', userEmail);
+                            localStorage.setItem('thrivestack_user_name', userName);
+                            localStorage.setItem('thrivestack_account_id', accountId);
+                            localStorage.setItem('thrivestack_account_name', accountName);
+                            
+                            // Verify localStorage storage
+                            const storedUserId = localStorage.getItem('thrivestack_user_id');
+                            const storedUserEmail = localStorage.getItem('thrivestack_user_email');
+                            const storedUserName = localStorage.getItem('thrivestack_user_name');
+                            const storedAccountId = localStorage.getItem('thrivestack_account_id');
+                            
+                            console.log('✅ User data stored in localStorage:', { 
+                                storedUserId, 
+                                storedUserEmail, 
+                                storedUserName,
+                                storedAccountId
                             });
-                            console.log('✅ Signup completion tracked successfully');
-                        } catch (error) {
-                            console.error('❌ Error tracking signup completion:', error);
-                        }
-                        
-                        // Set user data in ThriveStack
-                        if (thriveStack) {
-                            try {
-                                const userEmail = document.getElementById('email').value;
-                                const userName = document.getElementById('name').value;
-                                const userId = generateUserId(); // Generate a unique user ID
-                                
-                                console.log('📝 Generated user data:', { userId, userName, userEmail });
-                                
-                                // Call setUser method
-                                if (typeof thriveStack.setUser === 'function') {
-                                    thriveStack.setUser(userId, userEmail);
-                                    console.log('✅ setUser called successfully:', { userId, userEmail });
-                                } else {
-                                    console.error('❌ setUser method not available');
-                                    console.log('Available methods:', Object.keys(thriveStack));
-                                }
-                                
-                                // Call setGroup method
-                                if (typeof thriveStack.setGroup === 'function') {
-                                    const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
-                                    const groupDomain = 'yourcompany.com'; // Your company domain
-                                    const groupName = 'Your Company Name'; // Your company name
-                                    
-                                    thriveStack.setGroup(groupId, groupDomain, groupName);
-                                    console.log('✅ setGroup called successfully:', { groupId, groupDomain, groupName });
-                                } else {
-                                    console.error('❌ setGroup method not available');
-                                    console.log('Available methods:', Object.keys(thriveStack));
-                                }
-                                
-                                // Store user data in localStorage for dashboard access
-                                console.log('💾 Storing data in localStorage...');
-                                localStorage.setItem('thrivestack_user_id', userId);
-                                localStorage.setItem('thrivestack_user_email', userEmail);
-                                localStorage.setItem('thrivestack_user_name', userName);
-                                
-                                // Verify localStorage storage
-                                const storedUserId = localStorage.getItem('thrivestack_user_id');
-                                const storedUserEmail = localStorage.getItem('thrivestack_user_email');
-                                const storedUserName = localStorage.getItem('thrivestack_user_name');
-                                
-                                console.log('✅ User data stored in localStorage:', { 
-                                    storedUserId, 
-                                    storedUserEmail, 
-                                    storedUserName 
-                                });
-                                
-                                if (storedUserId && storedUserEmail && storedUserName) {
-                                    console.log('✅ localStorage verification successful');
-                                } else {
-                                    console.error('❌ localStorage verification failed');
-                                }
-                                
-                            } catch (error) {
-                                console.error('❌ Error setting ThriveStack data:', error);
+                            
+                            if (storedUserId && storedUserEmail && storedUserName && storedAccountId) {
+                                console.log('✅ localStorage verification successful');
+                            } else {
+                                console.error('❌ localStorage verification failed');
                             }
-                        } else {
-                            console.error('❌ ThriveStack not available');
+                            
+                        } catch (error) {
+                            console.error('❌ Error tracking ThriveStack events:', error);
                         }
                     } else {
                         console.error('❌ ThriveStack not available for signup completion tracking');
@@ -651,25 +698,53 @@
                 console.error('❌ ThriveStack script tag not found');
             }
             
-            // Wait for ThriveStack to load
-            setTimeout(() => {
-                // Check for both possible variable names
-                const thriveStack = window.thriveStack || window.thrivestack;
+                    // Check for ThriveStack immediately and then poll
+        function checkThriveStackImmediately() {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            
+            if (thriveStack) {
+                console.log('✅ ThriveStack found immediately!');
+                console.log('ThriveStack object:', thriveStack);
+                console.log('Available methods:', Object.keys(thriveStack));
+                console.log('Type:', typeof thriveStack);
                 
-                if (thriveStack) {
-                    console.log('✅ ThriveStack loaded successfully');
-                    console.log('ThriveStack object:', thriveStack);
-                    console.log('Available methods:', Object.keys(thriveStack));
-                    
-                    // Store reference globally for other functions
-                    window.thriveStackRef = thriveStack;
-                    
-                    setThriveStackGroup();
-                    
-                    // Test ThriveStack functionality
-                    testThriveStack();
-                } else {
-                    console.error('❌ ThriveStack not loaded after timeout');
+                // Store reference globally for other functions
+                window.thriveStackRef = thriveStack;
+                
+                setThriveStackGroup();
+                testThriveStack();
+                return true;
+            }
+            
+            // Log what we found
+            console.log('🔍 Current ThriveStack references:');
+            console.log('- thriveStackRef:', window.thriveStackRef);
+            console.log('- thriveStack:', window.thriveStack);
+            console.log('- thrivestack:', window.thrivestack);
+            
+            return false;
+        }
+            
+            // Check immediately
+            if (checkThriveStackImmediately()) {
+                return; // Exit if found immediately
+            }
+            
+            // Poll every 500ms for up to 5 seconds
+            let attempts = 0;
+            const maxAttempts = 10;
+            const pollInterval = setInterval(() => {
+                attempts++;
+                console.log(`🔍 Polling attempt ${attempts}/${maxAttempts} for ThriveStack...`);
+                
+                if (checkThriveStackImmediately()) {
+                    clearInterval(pollInterval);
+                    return;
+                }
+                
+                if (attempts >= maxAttempts) {
+                    clearInterval(pollInterval);
+                    console.error('❌ ThriveStack not loaded after all polling attempts');
                     console.log('Window object keys:', Object.keys(window));
                     
                     // Try to check for any global variables
@@ -680,10 +755,22 @@
                         console.log('🔍 Found ThriveStack variables:', thriveVars);
                         thriveVars.forEach(varName => {
                             console.log('Variable:', varName, 'Value:', window[varName]);
+                            console.log('Type:', typeof window[varName]);
+                            if (typeof window[varName] === 'object') {
+                                console.log('Methods:', Object.keys(window[varName]));
+                            }
                         });
+                        
+                        // If we found thriveStack, use it
+                        if (window.thriveStack) {
+                            console.log('🎯 Found thriveStack, using it now!');
+                            window.thriveStackRef = window.thriveStack;
+                            setThriveStackGroup();
+                            testThriveStack();
+                        }
                     }
                 }
-            }, 3000); // Increased timeout to 3 seconds
+            }, 500);
         });
         
         // Test function to verify ThriveStack is working
@@ -693,11 +780,16 @@
             
             if (thriveStack && typeof thriveStack.track === 'function') {
                 try {
-                    thriveStack.track('test_event', {
-                        message: 'Testing ThriveStack integration',
-                        timestamp: new Date().toISOString(),
-                        source: 'debug'
-                    });
+                    // Test event using the correct ThriveStack format
+                    thriveStack.track([{
+                        "event_name": "test_event",
+                        "properties": {
+                            "message": "Testing ThriveStack integration",
+                            "source": "debug",
+                            "test_type": "manual_test"
+                        },
+                        "timestamp": new Date().toISOString()
+                    }]);
                     console.log('✅ Test event sent successfully');
                     debugOutput.innerHTML = '<span style="color: green;">✅ Test event sent successfully!</span>';
                 } catch (error) {
@@ -893,6 +985,99 @@
                 form.dispatchEvent(new Event('submit'));
             } else {
                 console.error('❌ Form not found');
+            }
+        }
+        
+        // Force check ThriveStack immediately
+        function forceCheckThriveStack() {
+            const debugOutput = document.getElementById('debugOutput');
+            console.log('🔍 Force checking ThriveStack...');
+            
+            // Check for all possible references
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            
+            if (thriveStack) {
+                console.log('✅ ThriveStack found!');
+                console.log('Object:', thriveStack);
+                console.log('Methods:', Object.keys(thriveStack));
+                
+                // Store reference globally
+                window.thriveStackRef = thriveStack;
+                
+                // Test functionality
+                setThriveStackGroup();
+                testThriveStack();
+                
+                debugOutput.innerHTML = '<span style="color: green;">✅ ThriveStack found and configured!</span>';
+            } else {
+                console.error('❌ ThriveStack still not found');
+                console.log('Available window keys:', Object.keys(window).filter(key => key.toLowerCase().includes('thrive')));
+                debugOutput.innerHTML = '<span style="color: red;">❌ ThriveStack not found</span>';
+            }
+        }
+        
+        // Virality tracking function (for invitations)
+        function trackInviteSent(inviteeEmail, inviteeRole, featureName, subFeatureName) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thriveStack || window.thrivestack;
+            
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                try {
+                    const userId = localStorage.getItem('thrivestack_user_id');
+                    const accountId = localStorage.getItem('thrivestack_account_id');
+                    const accountName = localStorage.getItem('thrivestack_account_name');
+                    
+                    if (userId && accountId) {
+                        thriveStack.track([{
+                            "event_name": "invite_sent",
+                            "properties": {
+                                "feature_name": featureName || "general_invite",
+                                "invitee_email": inviteeEmail,
+                                "invitee_role": inviteeRole || "User",
+                                "invitee_role_id": inviteeRole?.toUpperCase() || "USER",
+                                "invitee_team_id": "default_team",
+                                "invitee_team": "Default Team",
+                                "invitee_user_id": "pending_registration",
+                                "sub_feature_name": subFeatureName || "user_invitation",
+                                "source_url": window.location.href
+                            },
+                            "user_id": userId,
+                            "timestamp": new Date().toISOString(),
+                            "context": {
+                                "group_id": accountId
+                            }
+                        }]);
+                        console.log('✅ Invite sent event tracked successfully');
+                        return true;
+                    } else {
+                        console.error('❌ Missing user or account data for invite tracking');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('❌ Error tracking invite sent:', error);
+                    return false;
+                }
+            } else {
+                console.error('❌ ThriveStack not available for invite tracking');
+                return false;
+            }
+        }
+        
+        // Test invite tracking functionality
+        function testInviteTracking() {
+            const debugOutput = document.getElementById('debugOutput');
+            console.log('🧪 Testing invite tracking...');
+            
+            const result = trackInviteSent(
+                'test@example.com',
+                'Admin',
+                'user_management',
+                'invite_user'
+            );
+            
+            if (result) {
+                debugOutput.innerHTML = '<span style="color: green;">✅ Invite tracking test successful!</span>';
+            } else {
+                debugOutput.innerHTML = '<span style="color: red;">❌ Invite tracking test failed</span>';
             }
         }
         
