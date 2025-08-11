@@ -573,7 +573,7 @@
             <div class="top-bar">
                 <div class="page-title">
                     <h1>Dashboard</h1>
-                    <p>Welcome back! Here's what's happening with your projects today.</p>
+                    <p id="welcomeMessage">Welcome back! Here's what's happening with your projects today.</p>
                 </div>
                 
                 <div class="user-menu">
@@ -587,12 +587,31 @@
                     </div>
                     
                     <div class="user-profile" onclick="toggleUserMenu()">
-                        <div class="user-avatar">JD</div>
+                        <div class="user-avatar" id="userAvatar">JD</div>
                         <div class="user-info">
-                            <h4>John Doe</h4>
-                            <p>Administrator</p>
+                            <h4 id="userName">John Doe</h4>
+                            <p id="userEmail">Administrator</p>
                         </div>
                         <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Info Card -->
+            <div class="user-info-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; margin-bottom: 2rem;">
+                <h3 style="margin: 0 0 1rem 0; color: #2d3748;">👋 User Information</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <strong>User ID:</strong> <span id="displayUserId">-</span>
+                    </div>
+                    <div>
+                        <strong>Name:</strong> <span id="displayUserName">-</span>
+                    </div>
+                    <div>
+                        <strong>Email:</strong> <span id="displayUserEmail">-</span>
+                    </div>
+                    <div>
+                        <strong>Status:</strong> <span style="color: #10b981; font-weight: 500;">✅ Active</span>
                     </div>
                 </div>
             </div>
@@ -858,6 +877,37 @@
             }
         }
         
+        // Update user profile display
+        function updateUserProfile() {
+            const userId = localStorage.getItem('thrivestack_user_id');
+            const userEmail = localStorage.getItem('thrivestack_user_email');
+            const userName = localStorage.getItem('thrivestack_user_name');
+            
+            if (userId && userEmail && userName) {
+                // Update user avatar with initials
+                const userAvatar = document.getElementById('userAvatar');
+                const initials = userName.split(' ').map(name => name.charAt(0)).join('').toUpperCase();
+                userAvatar.textContent = initials;
+                
+                // Update user name and email in profile
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userEmail').textContent = userEmail;
+                
+                // Update welcome message
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                welcomeMessage.textContent = `Welcome back, ${userName}! Here's what's happening with your projects today.`;
+                
+                // Update user info card
+                document.getElementById('displayUserId').textContent = userId;
+                document.getElementById('displayUserName').textContent = userName;
+                document.getElementById('displayUserEmail').textContent = userEmail;
+                
+                console.log('✅ User profile updated:', { userId, userName, userEmail });
+            } else {
+                console.log('ℹ️ No user data found in localStorage, using default profile');
+            }
+        }
+        
         // Track dashboard engagement with ThriveStack
         if (window.thrivestack) {
             // Set user data if available from signup
@@ -893,6 +943,9 @@
                 });
             });
         }
+        
+        // Update user profile when dashboard loads
+        updateUserProfile();
     </script>
 </body>
 </html>
