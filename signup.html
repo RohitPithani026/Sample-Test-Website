@@ -356,6 +356,9 @@
                 <button onclick="simulateSignup()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Simulate Signup
                 </button>
+                <button onclick="testFormSubmission()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Test Form Submit
+                </button>
                 <div id="debugOutput" style="margin-top: 1rem; font-family: monospace; font-size: 0.875rem; color: #6c757d;"></div>
             </div>
         </div>
@@ -821,6 +824,31 @@
             }
         }
         
+        // Test form submission directly
+        function testFormSubmission() {
+            const debugOutput = document.getElementById('debugOutput');
+            
+            console.log('🧪 Testing form submission directly...');
+            
+            // Fill form with test data
+            document.getElementById('name').value = 'Test User';
+            document.getElementById('email').value = 'test@example.com';
+            document.getElementById('password').value = 'testpassword123';
+            document.getElementById('confirmPassword').value = 'testpassword123';
+            document.getElementById('terms').checked = true;
+            
+            console.log('✅ Form filled with test data');
+            
+            // Trigger form submission
+            const form = document.getElementById('signupForm');
+            if (form) {
+                console.log('🚀 Triggering form submission...');
+                form.dispatchEvent(new Event('submit'));
+            } else {
+                console.error('❌ Form not found');
+            }
+        }
+        
         // Check ThriveStack status
         function checkThriveStackStatus() {
             const debugOutput = document.getElementById('debugOutput');
@@ -868,6 +896,13 @@
                 status += '<strong>Name:</strong> ' + (userName || 'Not set') + '<br>';
                 status += '<strong>Email:</strong> ' + (userEmail || 'Not set') + '<br>';
             }
+            
+            // Add current form values
+            status += '<br><h5>Current Form Values:</h5>';
+            const currentName = document.getElementById('name')?.value || 'Not filled';
+            const currentEmail = document.getElementById('email')?.value || 'Not filled';
+            status += '<strong>Name:</strong> ' + currentName + '<br>';
+            status += '<strong>Email:</strong> ' + currentEmail + '<br>';
             
             debugOutput.innerHTML = status;
         }
