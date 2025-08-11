@@ -347,8 +347,14 @@
                 <button onclick="testIdentifyCall()" style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: #ffc107; color: #212529; border: none; border-radius: 4px; cursor: pointer;">
                     Test Identify
                 </button>
-                <button onclick="testGroupCall()" style="padding: 0.5rem 1rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <button onclick="testGroupCall()" style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Test Group
+                </button>
+                <button onclick="testLocalStorage()" style="padding: 0.5rem 1rem; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Test localStorage
+                </button>
+                <button onclick="simulateSignup()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Simulate Signup
                 </button>
                 <div id="debugOutput" style="margin-top: 1rem; font-family: monospace; font-size: 0.875rem; color: #6c757d;"></div>
             </div>
@@ -379,7 +385,16 @@
         signupForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            console.log('🚀 Form submission started...');
+            console.log('Form data:', {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            });
+            
             if (validateForm()) {
+                console.log('✅ Form validation passed');
+                
                 // Track form submission with ThriveStack
                 console.log('🔍 Checking ThriveStack availability...');
                 if (window.thrivestack && typeof window.thrivestack.track === 'function') {
@@ -403,6 +418,8 @@
                 signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
                 
                 setTimeout(() => {
+                    console.log('⏰ Timeout completed, processing signup...');
+                    
                     // Track successful signup
                     console.log('🔍 Tracking successful signup...');
                     if (window.thrivestack && typeof window.thrivestack.track === 'function') {
@@ -422,6 +439,8 @@
                                 const userEmail = document.getElementById('email').value;
                                 const userName = document.getElementById('name').value;
                                 const userId = generateUserId(); // Generate a unique user ID
+                                
+                                console.log('📝 Generated user data:', { userId, userName, userEmail });
                                 
                                 // Call setUser method
                                 if (typeof window.thrivestack.setUser === 'function') {
@@ -444,11 +463,28 @@
                                 }
                                 
                                 // Store user data in localStorage for dashboard access
+                                console.log('💾 Storing data in localStorage...');
                                 localStorage.setItem('thrivestack_user_id', userId);
                                 localStorage.setItem('thrivestack_user_email', userEmail);
                                 localStorage.setItem('thrivestack_user_name', userName);
                                 
-                                console.log('✅ User data stored in localStorage:', { userId, userEmail, userName });
+                                // Verify localStorage storage
+                                const storedUserId = localStorage.getItem('thrivestack_user_id');
+                                const storedUserEmail = localStorage.getItem('thrivestack_user_email');
+                                const storedUserName = localStorage.getItem('thrivestack_user_name');
+                                
+                                console.log('✅ User data stored in localStorage:', { 
+                                    storedUserId, 
+                                    storedUserEmail, 
+                                    storedUserName 
+                                });
+                                
+                                if (storedUserId && storedUserEmail && storedUserName) {
+                                    console.log('✅ localStorage verification successful');
+                                } else {
+                                    console.error('❌ localStorage verification failed');
+                                }
+                                
                             } catch (error) {
                                 console.error('❌ Error setting ThriveStack data:', error);
                             }
@@ -461,9 +497,12 @@
                     
                     showNotification('Account created successfully! Redirecting to dashboard...', 'success');
                     setTimeout(() => {
+                        console.log('🔄 Redirecting to dashboard...');
                         window.location.href = 'dashboard.html';
                     }, 2000);
                 }, 2000);
+            } else {
+                console.log('❌ Form validation failed');
             }
         });
         
@@ -697,6 +736,91 @@
             }
         }
         
+        // Test localStorage functionality
+        function testLocalStorage() {
+            const debugOutput = document.getElementById('debugOutput');
+            
+            try {
+                // Test writing to localStorage
+                const testData = {
+                    id: 'test_' + Date.now(),
+                    name: 'Test User',
+                    email: 'test@example.com'
+                };
+                
+                localStorage.setItem('test_user_id', testData.id);
+                localStorage.setItem('test_user_name', testData.name);
+                localStorage.setItem('test_user_email', testData.email);
+                
+                // Test reading from localStorage
+                const readData = {
+                    id: localStorage.getItem('test_user_id'),
+                    name: localStorage.getItem('test_user_name'),
+                    email: localStorage.getItem('test_user_email')
+                };
+                
+                // Clean up test data
+                localStorage.removeItem('test_user_id');
+                localStorage.removeItem('test_user_name');
+                localStorage.removeItem('test_user_email');
+                
+                if (readData.id === testData.id && readData.name === testData.name && readData.email === testData.email) {
+                    debugOutput.innerHTML = '<span style="color: green;">✅ localStorage test successful!</span><br>' +
+                        '<strong>Test Data:</strong> ' + JSON.stringify(testData) + '<br>' +
+                        '<strong>Read Data:</strong> ' + JSON.stringify(readData);
+                    console.log('✅ localStorage test successful:', { testData, readData });
+                } else {
+                    debugOutput.innerHTML = '<span style="color: red;">❌ localStorage test failed - data mismatch</span>';
+                    console.error('❌ localStorage test failed - data mismatch:', { testData, readData });
+                }
+            } catch (error) {
+                debugOutput.innerHTML = '<span style="color: red;">❌ localStorage test failed: ' + error.message + '</span>';
+                console.error('❌ localStorage test failed:', error);
+            }
+        }
+        
+        // Simulate complete signup process
+        function simulateSignup() {
+            const debugOutput = document.getElementById('debugOutput');
+            
+            console.log('🎭 Simulating signup process...');
+            
+            try {
+                // Generate test user data
+                const userId = 'simulated_user_' + Date.now();
+                const userName = 'Simulated User';
+                const userEmail = 'simulated@example.com';
+                
+                // Store in localStorage
+                localStorage.setItem('thrivestack_user_id', userId);
+                localStorage.setItem('thrivestack_user_email', userEmail);
+                localStorage.setItem('thrivestack_user_name', userName);
+                
+                // Verify storage
+                const storedUserId = localStorage.getItem('thrivestack_user_id');
+                const storedUserEmail = localStorage.getItem('thrivestack_user_email');
+                const storedUserName = localStorage.getItem('thrivestack_user_name');
+                
+                if (storedUserId && storedUserEmail && storedUserName) {
+                    debugOutput.innerHTML = '<span style="color: green;">✅ Simulated signup successful!</span><br>' +
+                        '<strong>User ID:</strong> ' + storedUserId + '<br>' +
+                        '<strong>Name:</strong> ' + storedUserName + '<br>' +
+                        '<strong>Email:</strong> ' + storedUserEmail + '<br><br>' +
+                        '<strong>Now you can:</strong><br>' +
+                        '1. Go to dashboard.html<br>' +
+                        '2. User data should be displayed<br>' +
+                        '3. Check console for profile updates';
+                    
+                    console.log('✅ Simulated signup successful:', { storedUserId, storedUserName, storedUserEmail });
+                } else {
+                    debugOutput.innerHTML = '<span style="color: red;">❌ Simulated signup failed</span>';
+                }
+            } catch (error) {
+                debugOutput.innerHTML = '<span style="color: red;">❌ Simulation failed: ' + error.message + '</span>';
+                console.error('❌ Simulation failed:', error);
+            }
+        }
+        
         // Check ThriveStack status
         function checkThriveStackStatus() {
             const debugOutput = document.getElementById('debugOutput');
@@ -726,6 +850,24 @@
             
             status += '<br><strong>Script loaded:</strong> ' + (document.querySelector('script[src*="thrivestack"]') ? '✅ Yes' : '❌ No') + '<br>';
             status += '<strong>API Key:</strong> ' + (document.querySelector('script[src*="thrivestack"]')?.getAttribute('api-key') ? '✅ Present' : '❌ Missing') + '<br>';
+            
+            // Check localStorage status
+            status += '<br><h5>localStorage Status:</h5>';
+            const userId = localStorage.getItem('thrivestack_user_id');
+            const userEmail = localStorage.getItem('thrivestack_user_email');
+            const userName = localStorage.getItem('thrivestack_user_name');
+            
+            if (userId && userEmail && userName) {
+                status += '<span style="color: green;">✅ User data found in localStorage</span><br>';
+                status += '<strong>User ID:</strong> ' + userId + '<br>';
+                status += '<strong>Name:</strong> ' + userName + '<br>';
+                status += '<strong>Email:</strong> ' + userEmail + '<br>';
+            } else {
+                status += '<span style="color: orange;">⚠️ No user data in localStorage</span><br>';
+                status += '<strong>User ID:</strong> ' + (userId || 'Not set') + '<br>';
+                status += '<strong>Name:</strong> ' + (userName || 'Not set') + '<br>';
+                status += '<strong>Email:</strong> ' + (userEmail || 'Not set') + '<br>';
+            }
             
             debugOutput.innerHTML = status;
         }
