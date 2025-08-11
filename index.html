@@ -262,6 +262,23 @@
             document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
         }
         
+        // Set group data in ThriveStack
+        function setThriveStackGroup() {
+            if (window.thrivestack) {
+                // Example group data - customize with your actual values
+                const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
+                const groupDomain = 'yourcompany.com'; // Your company domain
+                const groupName = 'Your Company Name'; // Your company name
+                
+                window.thrivestack.setGroup(groupId, groupDomain, groupName);
+                
+                console.log('ThriveStack group data set:', { groupId, groupDomain, groupName });
+            }
+        }
+        
+        // Set group data when page loads
+        setThriveStackGroup();
+        
         // Track page view
         if (window.thrivestack) {
             window.thrivestack.track('page_viewed', {

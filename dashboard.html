@@ -844,11 +844,40 @@
         console.log('%c🎯 Dashboard loaded successfully!', 'color: #667eea; font-size: 18px; font-weight: bold;');
         console.log('%cWelcome to your admin dashboard. All systems are running smoothly.', 'color: #666; font-size: 14px;');
         
+        // Set group data in ThriveStack
+        function setThriveStackGroup() {
+            if (window.thrivestack) {
+                // Example group data - customize with your actual values
+                const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
+                const groupDomain = 'yourcompany.com'; // Your company domain
+                const groupName = 'Your Company Name'; // Your company name
+                
+                window.thrivestack.setGroup(groupId, groupDomain, groupName);
+                
+                console.log('ThriveStack group data set:', { groupId, groupDomain, groupName });
+            }
+        }
+        
         // Track dashboard engagement with ThriveStack
         if (window.thrivestack) {
+            // Set user data if available from signup
+            const userId = localStorage.getItem('thrivestack_user_id');
+            const userEmail = localStorage.getItem('thrivestack_user_email');
+            const userName = localStorage.getItem('thrivestack_user_name');
+            
+            if (userId && userEmail) {
+                window.thrivestack.setUser(userId, userEmail);
+                console.log('ThriveStack user data set:', { userId, userEmail, userName });
+            }
+            
+            // Set group data
+            setThriveStackGroup();
+            
             window.thrivestack.track('dashboard_accessed', {
                 source: 'signup_flow',
-                user_type: 'new_user'
+                user_type: 'new_user',
+                user_id: userId || 'unknown',
+                user_email: userEmail || 'unknown'
             });
             
             // Track dashboard interactions
@@ -857,7 +886,8 @@
                     if (window.thrivestack) {
                         window.thrivestack.track('dashboard_navigation', {
                             section: this.textContent.trim(),
-                            source: 'sidebar_nav'
+                            source: 'sidebar_nav',
+                            user_id: userId || 'unknown'
                         });
                     }
                 });

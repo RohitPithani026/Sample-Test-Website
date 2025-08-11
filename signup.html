@@ -381,6 +381,18 @@
                             email: document.getElementById('email').value,
                             source: 'website_signup'
                         });
+                        
+                        // Set user data in ThriveStack
+                        const userEmail = document.getElementById('email').value;
+                        const userName = document.getElementById('name').value;
+                        const userId = generateUserId(); // Generate a unique user ID
+                        
+                        window.thrivestack.setUser(userId, userEmail);
+                        
+                        // Store user data in localStorage for dashboard access
+                        localStorage.setItem('thrivestack_user_id', userId);
+                        localStorage.setItem('thrivestack_user_email', userEmail);
+                        localStorage.setItem('thrivestack_user_name', userName);
                     }
                     
                     showNotification('Account created successfully! Redirecting to dashboard...', 'success');
@@ -451,6 +463,30 @@
         function showLoginForm() {
             showNotification('Login functionality coming soon!', 'info');
         }
+        
+        // Generate unique user ID
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // Set group data in ThriveStack (you can customize these values)
+        function setThriveStackGroup() {
+            if (window.thrivestack) {
+                // Example group data - customize with your actual values
+                const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
+                const groupDomain = 'yourcompany.com'; // Your company domain
+                const groupName = 'Your Company Name'; // Your company name
+                
+                window.thrivestack.setGroup(groupId, groupDomain, groupName);
+                
+                console.log('ThriveStack group data set:', { groupId, groupDomain, groupName });
+            }
+        }
+        
+        // Set group data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setThriveStackGroup();
+        });
         
         // Real-time validation
         document.querySelectorAll('input').forEach(field => {
