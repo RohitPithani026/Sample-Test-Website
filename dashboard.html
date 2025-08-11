@@ -874,8 +874,19 @@
                 const groupName = 'Your Company Name'; // Your company name
                 
                 if (typeof thriveStack.setGroup === 'function') {
-                    thriveStack.setGroup(groupId, groupDomain, groupName);
-                    console.log('✅ ThriveStack group data set:', { groupId, groupDomain, groupName });
+                    // setGroup(userId, accountId, accountName, properties)
+                    // We need a userId here, so we'll get it from localStorage
+                    const userId = localStorage.getItem('thrivestack_user_id');
+                    if (userId) {
+                        thriveStack.setGroup(userId, groupId, groupName, {
+                            account_domain: groupDomain,
+                            source: "dashboard_access",
+                            last_updated: new Date().toISOString()
+                        });
+                        console.log('✅ ThriveStack group data set:', { userId, groupId, groupDomain, groupName });
+                    } else {
+                        console.log('ℹ️ No userId available for setGroup');
+                    }
                 } else {
                     console.log('ℹ️ setGroup method not available, using track method instead');
                     // Fallback to track method for group data
@@ -934,7 +945,12 @@
             
             if (userId && userEmail) {
                 if (typeof thriveStack.setUser === 'function') {
-                    thriveStack.setUser(userId, userEmail);
+                    // setUser(userId, email, properties)
+                    thriveStack.setUser(userId, userEmail, {
+                        user_name: userName,
+                        source: "dashboard_access",
+                        last_access: new Date().toISOString()
+                    });
                     console.log('✅ ThriveStack user data set:', { userId, userEmail, userName });
                 } else {
                     console.log('ℹ️ setUser method not available');

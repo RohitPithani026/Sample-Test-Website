@@ -365,6 +365,9 @@
                 <button onclick="testInviteTracking()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Test Invite Tracking
                 </button>
+                <button onclick="testSetUserAndGroup()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Test setUser & setGroup
+                </button>
                 <div id="debugOutput" style="margin-top: 1rem; font-family: monospace; font-size: 0.875rem; color: #6c757d;"></div>
             </div>
         </div>
@@ -454,8 +457,8 @@
                             const userName = document.getElementById('name').value;
                             const userId = generateUserId(); // Generate a unique user ID
                             const accountId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your account ID
-                            const accountName = 'Your Company Name';
-                            const accountDomain = 'yourcompany.com';
+                            const accountName = 'Acme Corporation';
+                            const accountDomain = 'acme.com';
                             
                             console.log('📝 Generated user data:', { userId, userName, userEmail, accountId });
                             
@@ -492,6 +495,19 @@
                             console.log('✅ Account creation event tracked successfully');
                             
                             // 3. User-Company Association Event
+                            console.log('🔍 About to track account_added_user event...');
+                            console.log('Event data:', {
+                                event_name: "account_added_user",
+                                properties: {
+                                    account_name: accountName,
+                                    user_email: userEmail
+                                },
+                                user_id: userId,
+                                context: {
+                                    group_id: accountId
+                                }
+                            });
+                            
                             thriveStack.track([{
                                 "event_name": "account_added_user",
                                 "properties": {
@@ -520,6 +536,39 @@
                                 }
                             }]);
                             console.log('✅ Feature usage event tracked successfully');
+                            
+                            // 5. Set User Data in ThriveStack
+                            console.log('🔍 Setting user data in ThriveStack...');
+                            if (typeof thriveStack.setUser === 'function') {
+                                // setUser(userId, email, properties)
+                                thriveStack.setUser(userId, userEmail, {
+                                    user_name: userName,
+                                    plan_type: "free_trial",
+                                    signup_date: new Date().toISOString(),
+                                    source: "website_signup"
+                                });
+                                console.log('✅ setUser called successfully:', { userId, userEmail, userName });
+                            } else {
+                                console.error('❌ setUser method not available');
+                                console.log('Available methods:', Object.keys(thriveStack));
+                            }
+                            
+                            // 6. Set Group Data in ThriveStack
+                            console.log('🔍 Setting group data in ThriveStack...');
+                            if (typeof thriveStack.setGroup === 'function') {
+                                // setGroup(userId, accountId, accountName, properties)
+                                thriveStack.setGroup(userId, accountId, accountName, {
+                                    plan_name: "Free Trial",
+                                    employee_count: 1,
+                                    account_domain: accountDomain,
+                                    signup_date: new Date().toISOString(),
+                                    source: "website_signup"
+                                });
+                                console.log('✅ setGroup called successfully:', { userId, accountId, accountName, accountDomain });
+                            } else {
+                                console.error('❌ setGroup method not available');
+                                console.log('Available methods:', Object.keys(thriveStack));
+                            }
                             
                             // Store user data in localStorage for dashboard access
                             console.log('💾 Storing data in localStorage...');
@@ -1078,6 +1127,74 @@
                 debugOutput.innerHTML = '<span style="color: green;">✅ Invite tracking test successful!</span>';
             } else {
                 debugOutput.innerHTML = '<span style="color: red;">❌ Invite tracking test failed</span>';
+            }
+        }
+        
+        // Test setUser and setGroup functionality
+        function testSetUserAndGroup() {
+            const debugOutput = document.getElementById('debugOutput');
+            console.log('🧪 Testing setUser and setGroup...');
+            
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            
+            if (thriveStack) {
+                const testUserId = 'test_user_' + Date.now();
+                const testUserEmail = 'test@example.com';
+                const testGroupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b';
+                const testGroupDomain = 'acme.com';
+                const testGroupName = 'Acme Corporation';
+                
+                console.log('📝 Test data:', { testUserId, testUserEmail, testGroupId, testGroupDomain, testGroupName });
+                
+                let success = true;
+                
+                // Test setUser
+                if (typeof thriveStack.setUser === 'function') {
+                    try {
+                        // setUser(userId, email, properties)
+                        thriveStack.setUser(testUserId, testUserEmail, {
+                            user_name: "Test User",
+                            plan_type: "test_plan",
+                            test_mode: true
+                        });
+                        console.log('✅ setUser test successful');
+                    } catch (error) {
+                        console.error('❌ setUser test failed:', error);
+                        success = false;
+                    }
+                } else {
+                    console.error('❌ setUser method not available');
+                    success = false;
+                }
+                
+                // Test setGroup
+                if (typeof thriveStack.setGroup === 'function') {
+                    try {
+                        // setGroup(userId, accountId, accountName, properties)
+                        thriveStack.setGroup(testUserId, testGroupId, testGroupName, {
+                            plan_name: "Test Plan",
+                            employee_count: 1,
+                            account_domain: testGroupDomain,
+                            test_mode: true
+                        });
+                        console.log('✅ setGroup test successful');
+                    } catch (error) {
+                        console.error('❌ setGroup test failed:', error);
+                        success = false;
+                    }
+                } else {
+                    console.error('❌ setGroup method not available');
+                    success = false;
+                }
+                
+                if (success) {
+                    debugOutput.innerHTML = '<span style="color: green;">✅ setUser & setGroup tests successful!</span>';
+                } else {
+                    debugOutput.innerHTML = '<span style="color: red;">❌ Some setUser & setGroup tests failed</span>';
+                }
+            } else {
+                console.error('❌ ThriveStack not available for testing');
+                debugOutput.innerHTML = '<span style="color: red;">❌ ThriveStack not available</span>';
             }
         }
         
