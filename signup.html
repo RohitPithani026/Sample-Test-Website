@@ -400,10 +400,12 @@
                 
                 // Track form submission with ThriveStack
                 console.log('🔍 Checking ThriveStack availability...');
-                if (window.thrivestack && typeof window.thrivestack.track === 'function') {
+                const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+                
+                if (thriveStack && typeof thriveStack.track === 'function') {
                     console.log('✅ ThriveStack available, tracking form submission...');
                     try {
-                        window.thrivestack.track('signup_form_submitted', {
+                        thriveStack.track('signup_form_submitted', {
                             email: document.getElementById('email').value,
                             source: 'website_signup'
                         });
@@ -413,7 +415,11 @@
                     }
                 } else {
                     console.error('❌ ThriveStack not available or track method missing');
-                    console.log('ThriveStack object:', window.thrivestack);
+                    console.log('ThriveStack references:', {
+                        'window.thriveStackRef': window.thriveStackRef,
+                        'window.thriveStack': window.thriveStack,
+                        'window.thrivestack': window.thrivestack
+                    });
                 }
                 
                 // Simulate form submission
@@ -425,9 +431,11 @@
                     
                     // Track successful signup
                     console.log('🔍 Tracking successful signup...');
-                    if (window.thrivestack && typeof window.thrivestack.track === 'function') {
+                    const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+                    
+                    if (thriveStack && typeof thriveStack.track === 'function') {
                         try {
-                            window.thrivestack.track('signup_completed', {
+                            thriveStack.track('signup_completed', {
                                 email: document.getElementById('email').value,
                                 source: 'website_signup'
                             });
@@ -437,7 +445,7 @@
                         }
                         
                         // Set user data in ThriveStack
-                        if (window.thrivestack) {
+                        if (thriveStack) {
                             try {
                                 const userEmail = document.getElementById('email').value;
                                 const userName = document.getElementById('name').value;
@@ -446,23 +454,25 @@
                                 console.log('📝 Generated user data:', { userId, userName, userEmail });
                                 
                                 // Call setUser method
-                                if (typeof window.thrivestack.setUser === 'function') {
-                                    window.thrivestack.setUser(userId, userEmail);
+                                if (typeof thriveStack.setUser === 'function') {
+                                    thriveStack.setUser(userId, userEmail);
                                     console.log('✅ setUser called successfully:', { userId, userEmail });
                                 } else {
                                     console.error('❌ setUser method not available');
+                                    console.log('Available methods:', Object.keys(thriveStack));
                                 }
                                 
                                 // Call setGroup method
-                                if (typeof window.thrivestack.setGroup === 'function') {
+                                if (typeof thriveStack.setGroup === 'function') {
                                     const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
                                     const groupDomain = 'yourcompany.com'; // Your company domain
                                     const groupName = 'Your Company Name'; // Your company name
                                     
-                                    window.thrivestack.setGroup(groupId, groupDomain, groupName);
+                                    thriveStack.setGroup(groupId, groupDomain, groupName);
                                     console.log('✅ setGroup called successfully:', { groupId, groupDomain, groupName });
                                 } else {
                                     console.error('❌ setGroup method not available');
+                                    console.log('Available methods:', Object.keys(thriveStack));
                                 }
                                 
                                 // Store user data in localStorage for dashboard access
@@ -496,6 +506,11 @@
                         }
                     } else {
                         console.error('❌ ThriveStack not available for signup completion tracking');
+                        console.log('ThriveStack references:', {
+                            'window.thriveStackRef': window.thriveStackRef,
+                            'window.thriveStack': window.thriveStack,
+                            'window.thrivestack': window.thrivestack
+                        });
                     }
                     
                     showNotification('Account created successfully! Redirecting to dashboard...', 'success');
@@ -579,20 +594,25 @@
         function setThriveStackGroup() {
             console.log('🔍 Setting ThriveStack group data...');
             
-            // Try different possible method names
-            const possibleGroupMethods = ['setGroup', 'group', 'identifyGroup'];
-            let groupMethodFound = false;
+            // Get ThriveStack reference
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
             
-            if (window.thrivestack) {
+            if (thriveStack) {
+                console.log('✅ ThriveStack found, checking for group methods...');
+                
+                // Try different possible method names
+                const possibleGroupMethods = ['setGroup', 'group', 'identifyGroup'];
+                let groupMethodFound = false;
+                
                 for (const methodName of possibleGroupMethods) {
-                    if (typeof window.thrivestack[methodName] === 'function') {
+                    if (typeof thriveStack[methodName] === 'function') {
                         try {
                             // Example group data - customize with your actual values
                             const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
                             const groupDomain = 'yourcompany.com'; // Your company domain
                             const groupName = 'Your Company Name'; // Your company name
                             
-                            window.thrivestack[methodName](groupId, groupDomain, groupName);
+                            thriveStack[methodName](groupId, groupDomain, groupName);
                             
                             console.log('✅ ThriveStack group data set successfully using method:', methodName, { groupId, groupDomain, groupName });
                             groupMethodFound = true;
@@ -604,11 +624,16 @@
                 }
                 
                 if (!groupMethodFound) {
-                    console.error('❌ No group method found. Available methods:', Object.keys(window.thrivestack));
-                    console.log('ThriveStack object:', window.thrivestack);
+                    console.error('❌ No group method found. Available methods:', Object.keys(thriveStack));
+                    console.log('ThriveStack object:', thriveStack);
                 }
             } else {
                 console.error('❌ ThriveStack not available');
+                console.log('Available references:', {
+                    'window.thriveStackRef': window.thriveStackRef,
+                    'window.thriveStack': window.thriveStack,
+                    'window.thrivestack': window.thrivestack
+                });
             }
         }
         
@@ -628,10 +653,17 @@
             
             // Wait for ThriveStack to load
             setTimeout(() => {
-                if (window.thrivestack) {
+                // Check for both possible variable names
+                const thriveStack = window.thriveStack || window.thrivestack;
+                
+                if (thriveStack) {
                     console.log('✅ ThriveStack loaded successfully');
-                    console.log('ThriveStack object:', window.thrivestack);
-                    console.log('Available methods:', Object.keys(window.thrivestack));
+                    console.log('ThriveStack object:', thriveStack);
+                    console.log('Available methods:', Object.keys(thriveStack));
+                    
+                    // Store reference globally for other functions
+                    window.thriveStackRef = thriveStack;
+                    
                     setThriveStackGroup();
                     
                     // Test ThriveStack functionality
@@ -641,7 +673,15 @@
                     console.log('Window object keys:', Object.keys(window));
                     
                     // Try to check for any global variables
-                    console.log('Global variables:', Object.keys(window).filter(key => key.toLowerCase().includes('thrive')));
+                    const thriveVars = Object.keys(window).filter(key => key.toLowerCase().includes('thrive'));
+                    console.log('Global variables:', thriveVars);
+                    
+                    if (thriveVars.length > 0) {
+                        console.log('🔍 Found ThriveStack variables:', thriveVars);
+                        thriveVars.forEach(varName => {
+                            console.log('Variable:', varName, 'Value:', window[varName]);
+                        });
+                    }
                 }
             }, 3000); // Increased timeout to 3 seconds
         });
@@ -649,9 +689,11 @@
         // Test function to verify ThriveStack is working
         function testThriveStack() {
             const debugOutput = document.getElementById('debugOutput');
-            if (window.thrivestack && typeof window.thrivestack.track === 'function') {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            
+            if (thriveStack && typeof thriveStack.track === 'function') {
                 try {
-                    window.thrivestack.track('test_event', {
+                    thriveStack.track('test_event', {
                         message: 'Testing ThriveStack integration',
                         timestamp: new Date().toISOString(),
                         source: 'debug'
@@ -665,6 +707,11 @@
             } else {
                 console.error('❌ Cannot test - ThriveStack track method not available');
                 debugOutput.innerHTML = '<span style="color: red;">❌ ThriveStack track method not available</span>';
+                console.log('ThriveStack references:', {
+                    'window.thriveStackRef': window.thriveStackRef,
+                    'window.thriveStack': window.thriveStack,
+                    'window.thrivestack': window.thrivestack
+                });
             }
         }
         
@@ -854,26 +901,34 @@
             const debugOutput = document.getElementById('debugOutput');
             let status = '<h5>ThriveStack Status:</h5>';
             
-            if (window.thrivestack) {
+            // Check for all possible ThriveStack references
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            
+            if (thriveStack) {
                 status += '<span style="color: green;">✅ ThriveStack object exists</span><br>';
-                status += '<strong>Available methods:</strong> ' + Object.keys(window.thrivestack).join(', ') + '<br>';
-                status += '<strong>Track method:</strong> ' + (typeof window.thrivestack.track === 'function' ? '✅ Available' : '❌ Missing') + '<br>';
+                status += '<strong>Reference used:</strong> ' + (window.thriveStackRef ? 'thriveStackRef' : window.thriveStack ? 'thriveStack' : 'thrivestack') + '<br>';
+                status += '<strong>Available methods:</strong> ' + Object.keys(thriveStack).join(', ') + '<br>';
+                status += '<strong>Track method:</strong> ' + (typeof thriveStack.track === 'function' ? '✅ Available' : '❌ Missing') + '<br>';
                 
                 // Check for user identification methods
                 const userMethods = ['setUser', 'identify', 'user', 'identifyUser'];
-                const availableUserMethods = userMethods.filter(method => typeof window.thrivestack[method] === 'function');
+                const availableUserMethods = userMethods.filter(method => typeof thriveStack[method] === 'function');
                 status += '<strong>User methods:</strong> ' + (availableUserMethods.length > 0 ? '✅ ' + availableUserMethods.join(', ') : '❌ None found') + '<br>';
                 
                 // Check for group methods
                 const groupMethods = ['setGroup', 'group', 'identifyGroup'];
-                const availableGroupMethods = groupMethods.filter(method => typeof window.thrivestack[method] === 'function');
+                const availableGroupMethods = groupMethods.filter(method => typeof thriveStack[method] === 'function');
                 status += '<strong>Group methods:</strong> ' + (availableGroupMethods.length > 0 ? '✅ ' + availableGroupMethods.join(', ') : '❌ None found') + '<br>';
                 
                 // Show full object for debugging
                 status += '<br><strong>Full ThriveStack object:</strong><br>';
-                status += '<pre style="background: #f8f9fa; padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; overflow-x: auto;">' + JSON.stringify(window.thrivestack, null, 2) + '</pre>';
+                status += '<pre style="background: #f8f9fa; padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; overflow-x: auto;">' + JSON.stringify(thriveStack, null, 2) + '</pre>';
             } else {
                 status += '<span style="color: red;">❌ ThriveStack object not found</span><br>';
+                status += '<strong>Available references:</strong><br>';
+                status += '- thriveStackRef: ' + (window.thriveStackRef ? '✅ Found' : '❌ Not found') + '<br>';
+                status += '- thriveStack: ' + (window.thriveStack ? '✅ Found' : '❌ Not found') + '<br>';
+                status += '- thrivestack: ' + (window.thrivestack ? '✅ Found' : '❌ Not found') + '<br>';
             }
             
             status += '<br><strong>Script loaded:</strong> ' + (document.querySelector('script[src*="thrivestack"]') ? '✅ Yes' : '❌ No') + '<br>';
