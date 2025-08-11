@@ -50,8 +50,8 @@
                     We create experiences that matter and solutions that work.
                 </p>
                 <div class="hero-buttons">
-                    <button class="btn btn-primary" onclick="window.location.href='signup.html'">Get Started</button>
-                    <button class="btn btn-secondary">Learn More</button>
+                    <button class="btn btn-primary" onclick="trackGetStarted()">Get Started</button>
+                    <button class="btn btn-secondary" onclick="trackLearnMore()">Learn More</button>
                 </div>
             </div>
             <div class="hero-image">
@@ -238,5 +238,37 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="https://ts-script.app.thrivestack.ai/latest/thrivestack.js" api-key="j5DqG0m64du3HYYMjlaj8qDvnFXPkOBrJSIU3Nn6NG4=" source="marketing,product"></script>
+    <script>
+        // ThriveStack tracking functions
+        function trackGetStarted() {
+            if (window.thrivestack) {
+                window.thrivestack.track('get_started_clicked', {
+                    source: 'hero_section',
+                    page: 'homepage'
+                });
+            }
+            window.location.href = 'signup.html';
+        }
+        
+        function trackLearnMore() {
+            if (window.thrivestack) {
+                window.thrivestack.track('learn_more_clicked', {
+                    source: 'hero_section',
+                    page: 'homepage'
+                });
+            }
+            // Scroll to features section
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Track page view
+        if (window.thrivestack) {
+            window.thrivestack.track('page_viewed', {
+                page: 'homepage',
+                source: 'direct_traffic'
+            });
+        }
+    </script>
 </body>
 </html>

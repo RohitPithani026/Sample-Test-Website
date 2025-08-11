@@ -758,6 +758,7 @@
     </div>
     
     <script src="script.js"></script>
+    <script src="https://ts-script.app.thrivestack.ai/latest/thrivestack.js" api-key="j5DqG0m64du3HYYMjlaj8qDvnFXPkOBrJSIU3Nn6NG4=" source="marketing,product"></script>
     <script>
         // Mobile menu toggle
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -842,6 +843,26 @@
         // Console welcome for dashboard
         console.log('%c🎯 Dashboard loaded successfully!', 'color: #667eea; font-size: 18px; font-weight: bold;');
         console.log('%cWelcome to your admin dashboard. All systems are running smoothly.', 'color: #666; font-size: 14px;');
+        
+        // Track dashboard engagement with ThriveStack
+        if (window.thrivestack) {
+            window.thrivestack.track('dashboard_accessed', {
+                source: 'signup_flow',
+                user_type: 'new_user'
+            });
+            
+            // Track dashboard interactions
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.thrivestack) {
+                        window.thrivestack.track('dashboard_navigation', {
+                            section: this.textContent.trim(),
+                            source: 'sidebar_nav'
+                        });
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>

@@ -337,6 +337,7 @@
     </div>
     
     <script src="script.js"></script>
+    <script src="https://ts-script.app.thrivestack.ai/latest/thrivestack.js" api-key="j5DqG0m64du3HYYMjlaj8qDvnFXPkOBrJSIU3Nn6NG4=" source="marketing,product"></script>
     <script>
         // Password toggle functionality
         document.getElementById('passwordToggle').addEventListener('click', function() {
@@ -361,11 +362,27 @@
             e.preventDefault();
             
             if (validateForm()) {
+                // Track form submission with ThriveStack
+                if (window.thrivestack) {
+                    window.thrivestack.track('signup_form_submitted', {
+                        email: document.getElementById('email').value,
+                        source: 'website_signup'
+                    });
+                }
+                
                 // Simulate form submission
                 signupBtn.disabled = true;
                 signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
                 
                 setTimeout(() => {
+                    // Track successful signup
+                    if (window.thrivestack) {
+                        window.thrivestack.track('signup_completed', {
+                            email: document.getElementById('email').value,
+                            source: 'website_signup'
+                        });
+                    }
+                    
                     showNotification('Account created successfully! Redirecting to dashboard...', 'success');
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
@@ -443,6 +460,26 @@
                 
                 if (this.hasAttribute('required') && !this.value.trim()) {
                     formGroup.classList.add('error');
+                }
+                
+                // Track field completion with ThriveStack
+                if (window.thrivestack && this.value.trim()) {
+                    window.thrivestack.track('form_field_completed', {
+                        field_name: this.name,
+                        field_type: this.type,
+                        source: 'signup_form'
+                    });
+                }
+            });
+            
+            // Track field focus
+            field.addEventListener('focus', function() {
+                if (window.thrivestack) {
+                    window.thrivestack.track('form_field_focused', {
+                        field_name: this.name,
+                        field_type: this.type,
+                        source: 'signup_form'
+                    });
                 }
             });
         });
