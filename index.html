@@ -242,52 +242,341 @@
 source="marketing">
 </script>
     <script>
-        // ThriveStack tracking functions
+        // Enhanced ThriveStack tracking functions
         function trackGetStarted() {
-            if (window.thrivestack) {
-                window.thrivestack.track('get_started_clicked', {
-                    source: 'hero_section',
-                    page: 'homepage'
-                });
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "get_started_clicked",
+                    "properties": {
+                        "source": "hero_section",
+                        "page": "homepage",
+                        "button_type": "primary_cta",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Get Started button tracked');
             }
             window.location.href = 'signup.html';
         }
         
         function trackLearnMore() {
-            if (window.thrivestack) {
-                window.thrivestack.track('learn_more_clicked', {
-                    source: 'hero_section',
-                    page: 'homepage'
-                });
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "learn_more_clicked",
+                    "properties": {
+                        "source": "hero_section",
+                        "page": "homepage",
+                        "button_type": "secondary_cta",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Learn More button tracked');
             }
             // Scroll to features section
             document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
         }
         
+        // Track navigation clicks
+        function trackNavigation(section) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "navigation_clicked",
+                    "properties": {
+                        "section": section,
+                        "page": "homepage",
+                        "navigation_type": "main_nav",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Navigation tracked:', section);
+            }
+        }
+        
+        // Track feature card interactions
+        function trackFeatureInteraction(featureName) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "feature_interaction",
+                    "properties": {
+                        "feature_name": featureName,
+                        "page": "homepage",
+                        "interaction_type": "feature_card_view",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Feature interaction tracked:', featureName);
+            }
+        }
+        
+        // Track contact form interactions
+        function trackContactForm(action, data = {}) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "contact_form_interaction",
+                    "properties": {
+                        "action": action,
+                        "page": "homepage",
+                        "form_type": "contact_form",
+                        "timestamp": new Date().toISOString(),
+                        ...data
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Contact form tracked:', action);
+            }
+        }
+        
+        // Track social media clicks
+        function trackSocialMedia(platform) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "social_media_clicked",
+                    "properties": {
+                        "platform": platform,
+                        "page": "homepage",
+                        "click_type": "footer_social",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Social media tracked:', platform);
+            }
+        }
+        
+        // Track newsletter subscription
+        function trackNewsletterSubscription() {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "newsletter_subscription",
+                    "properties": {
+                        "page": "homepage",
+                        "subscription_type": "footer_newsletter",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Newsletter subscription tracked');
+            }
+        }
+        
+        // Track scroll depth
+        function trackScrollDepth() {
+            let maxScroll = 0;
+            let tracked25 = false, tracked50 = false, tracked75 = false, tracked100 = false;
+            
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.body.offsetHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                
+                if (scrollPercent >= 25 && !tracked25) {
+                    trackScrollEvent(25);
+                    tracked25 = true;
+                } else if (scrollPercent >= 50 && !tracked50) {
+                    trackScrollEvent(50);
+                    tracked50 = true;
+                } else if (scrollPercent >= 75 && !tracked75) {
+                    trackScrollEvent(75);
+                    tracked75 = true;
+                } else if (scrollPercent >= 100 && !tracked100) {
+                    trackScrollEvent(100);
+                    tracked100 = true;
+                }
+            });
+        }
+        
+        function trackScrollEvent(percentage) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "scroll_depth_reached",
+                    "properties": {
+                        "scroll_percentage": percentage,
+                        "page": "homepage",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Scroll depth tracked:', percentage + '%');
+            }
+        }
+        
+        // Track time on page
+        function trackTimeOnPage() {
+            const startTime = Date.now();
+            
+            window.addEventListener('beforeunload', () => {
+                const timeSpent = Math.round((Date.now() - startTime) / 1000);
+                const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+                if (thriveStack && typeof thriveStack.track === 'function') {
+                    thriveStack.track([{
+                        "event_name": "time_on_page",
+                        "properties": {
+                            "time_spent_seconds": timeSpent,
+                            "page": "homepage",
+                            "timestamp": new Date().toISOString()
+                        },
+                        "timestamp": new Date().toISOString()
+                    }]);
+                    console.log('✅ Time on page tracked:', timeSpent + ' seconds');
+                }
+            });
+        }
+        
         // Set group data in ThriveStack
         function setThriveStackGroup() {
-            if (window.thrivestack) {
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.setGroup === 'function') {
                 // Example group data - customize with your actual values
                 const groupId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your group ID
                 const groupDomain = 'yourcompany.com'; // Your company domain
                 const groupName = 'Your Company Name'; // Your company name
                 
-                window.thrivestack.setGroup(groupId, groupDomain, groupName);
+                // setGroup(userId, accountId, accountName, properties)
+                const userId = 'anonymous_user_' + Date.now();
+                thriveStack.setGroup(userId, groupId, groupName, {
+                    account_domain: groupDomain,
+                    source: "homepage_access",
+                    last_updated: new Date().toISOString()
+                });
                 
-                console.log('ThriveStack group data set:', { groupId, groupDomain, groupName });
+                console.log('✅ ThriveStack group data set:', { userId, groupId, groupDomain, groupName });
             }
         }
         
-        // Set group data when page loads
-        setThriveStackGroup();
-        
-        // Track page view
-        if (window.thrivestack) {
-            window.thrivestack.track('page_viewed', {
-                page: 'homepage',
-                source: 'direct_traffic'
+        // Initialize tracking when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set group data
+            setThriveStackGroup();
+            
+            // Track page view
+            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            if (thriveStack && typeof thriveStack.track === 'function') {
+                thriveStack.track([{
+                    "event_name": "page_viewed",
+                    "properties": {
+                        "page": "homepage",
+                        "source": "direct_traffic",
+                        "timestamp": new Date().toISOString()
+                    },
+                    "timestamp": new Date().toISOString()
+                }]);
+                console.log('✅ Page view tracked');
+            }
+            
+            // Initialize scroll tracking
+            trackScrollDepth();
+            
+            // Initialize time tracking
+            trackTimeOnPage();
+            
+            // Add click event listeners for navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const section = this.getAttribute('href').replace('#', '') || 'external';
+                    trackNavigation(section);
+                });
             });
-        }
+            
+            // Add click event listeners for feature cards
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const featureName = this.querySelector('h3').textContent;
+                    trackFeatureInteraction(featureName);
+                });
+            });
+            
+            // Add click event listeners for social media links
+            document.querySelectorAll('.social-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const platform = this.querySelector('i').className.split(' ')[1].replace('fa-', '');
+                    trackSocialMedia(platform);
+                });
+            });
+            
+            // Handle contact form submission
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        subject: document.getElementById('subject').value,
+                        message_length: document.getElementById('message').value.length
+                    };
+                    
+                    trackContactForm('form_submitted', formData);
+                    
+                    // Show success message
+                    alert('Thank you for your message! We\'ll get back to you soon.');
+                    this.reset();
+                });
+                
+                // Track form field interactions
+                const formFields = contactForm.querySelectorAll('input, textarea');
+                formFields.forEach(field => {
+                    field.addEventListener('focus', () => {
+                        trackContactForm('field_focused', { field_name: field.name });
+                    });
+                    
+                    field.addEventListener('blur', () => {
+                        trackContactForm('field_completed', { field_name: field.name });
+                    });
+                });
+            }
+            
+            // Handle newsletter subscription
+            const newsletterForm = document.querySelector('.newsletter-form');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    trackNewsletterSubscription();
+                    alert('Thank you for subscribing to our newsletter!');
+                    this.reset();
+                });
+            }
+            
+            // Track stats section visibility
+            const statsSection = document.querySelector('.stats');
+            if (statsSection) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+                            if (thriveStack && typeof thriveStack.track === 'function') {
+                                thriveStack.track([{
+                                    "event_name": "stats_section_viewed",
+                                    "properties": {
+                                        "page": "homepage",
+                                        "section": "about_stats",
+                                        "timestamp": new Date().toISOString()
+                                    },
+                                    "timestamp": new Date().toISOString()
+                                }]);
+                                console.log('✅ Stats section viewed');
+                            }
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                observer.observe(statsSection);
+            }
+            
+            console.log('🎯 Enhanced tracking initialized on homepage');
+        });
     </script>
 </body>
 </html>
