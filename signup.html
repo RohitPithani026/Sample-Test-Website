@@ -448,6 +448,10 @@ source="marketing,product">
                     });
                 }
                 
+                // Get user data for tracking
+                const userEmail = document.getElementById('email').value;
+                const userName = document.getElementById('name').value;
+                
                 // Simulate form submission
                 signupBtn.disabled = true;
                 signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
@@ -461,8 +465,6 @@ source="marketing,product">
                     
                     if (thriveStack && typeof thriveStack.track === 'function') {
                         try {
-                            const userEmail = document.getElementById('email').value;
-                            const userName = document.getElementById('name').value;
                             const userId = getOrCreateUserId(userEmail); // Get existing or create new user ID
                             const accountId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your account ID
                             const accountName = 'Acme Corporation';
