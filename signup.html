@@ -370,6 +370,12 @@ source="marketing,product">
                 <button onclick="testSetUserAndGroup()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Test setUser & setGroup
                 </button>
+                <button onclick="testExistingUser()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Test Existing User
+                </button>
+                <button onclick="clearAllUserData()" style="padding: 0.5rem 1rem; margin-top: 0.5rem; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Clear All User Data
+                </button>
                 <div id="debugOutput" style="margin-top: 1rem; font-family: monospace; font-size: 0.875rem; color: #6c757d;"></div>
             </div>
         </div>
@@ -457,28 +463,32 @@ source="marketing,product">
                         try {
                             const userEmail = document.getElementById('email').value;
                             const userName = document.getElementById('name').value;
-                            const userId = generateUserId(); // Generate a unique user ID
+                            const userId = getOrCreateUserId(userEmail); // Get existing or create new user ID
                             const accountId = 'ac8db7ba-5139-4911-ba6e-523fd9c4704b'; // Your account ID
                             const accountName = 'Acme Corporation';
                             const accountDomain = 'acme.com';
                             
                             console.log('📝 Generated user data:', { userId, userName, userEmail, accountId });
                             
+                            // Check if this is a returning user
+                            const isReturningUser = localStorage.getItem('thrivestack_user_email_' + userEmail) !== null;
+                            
                             // 1. Signup Tracking Event
                             thriveStack.track([{
-                                "event_name": "signed_up",
+                                "event_name": isReturningUser ? "returning_user_signup" : "signed_up",
                                 "properties": {
                                     "user_email": userEmail,
                                     "user_name": userName,
+                                    "is_returning_user": isReturningUser,
                                     "utm_campaign": "customer_success",
                                     "utm_medium": "web",
                                     "utm_source": "signup_page",
-                                    "utm_term": "free_trial"
+                                    "utm_term": isReturningUser ? "returning_user" : "free_trial"
                                 },
                                 "user_id": userId,
                                 "timestamp": new Date().toISOString()
                             }]);
-                            console.log('✅ Signup event tracked successfully');
+                            console.log('✅ Signup event tracked successfully:', isReturningUser ? 'Returning user' : 'New user');
                             
                             // 2. Account Creation Tracking Event
                             thriveStack.track([{
@@ -611,7 +621,12 @@ source="marketing,product">
                         });
                     }
                     
-                    showNotification('Account created successfully! Redirecting to dashboard...', 'success');
+                    const isReturningUser = localStorage.getItem('thrivestack_user_email_' + userEmail) !== null;
+                    const message = isReturningUser 
+                        ? 'Welcome back! Your existing account has been updated. Redirecting to dashboard...' 
+                        : 'Account created successfully! Redirecting to dashboard...';
+                    
+                    showNotification(message, 'success');
                     setTimeout(() => {
                         console.log('🔄 Redirecting to dashboard...');
                         window.location.href = 'dashboard.html';
@@ -683,7 +698,27 @@ source="marketing,product">
             showNotification('Login functionality coming soon!', 'info');
         }
         
-        // Generate unique user ID
+        // Generate or retrieve user ID based on email
+        function getOrCreateUserId(email) {
+            // Check if user with this email already exists
+            const existingUserId = localStorage.getItem('thrivestack_user_email_' + email);
+            
+            if (existingUserId) {
+                console.log('✅ Existing user found with email:', email, 'User ID:', existingUserId);
+                return existingUserId;
+            } else {
+                // Generate new user ID for new user
+                const newUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                console.log('🆕 New user created with email:', email, 'User ID:', newUserId);
+                
+                // Store the mapping of email to user ID for future reference
+                localStorage.setItem('thrivestack_user_email_' + email, newUserId);
+                
+                return newUserId;
+            }
+        }
+        
+        // Generate unique user ID (kept for backward compatibility)
         function generateUserId() {
             return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
@@ -1132,6 +1167,75 @@ source="marketing,product">
             }
         }
         
+        // Clear all user data for testing
+        function clearAllUserData() {
+            const debugOutput = document.getElementById('debugOutput');
+            
+            console.log('🧹 Clearing all user data...');
+            
+            try {
+                // Get all keys from localStorage
+                const keys = Object.keys(localStorage);
+                const userKeys = keys.filter(key => key.includes('thrivestack') || key.includes('user') || key.includes('account'));
+                
+                // Remove user-related keys
+                userKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log('🗑️ Removed:', key);
+                });
+                
+                debugOutput.innerHTML = '<span style="color: orange;">🧹 All user data cleared!</span><br>' +
+                    '<strong>Removed keys:</strong> ' + userKeys.join(', ') + '<br>' +
+                    '<strong>Total keys removed:</strong> ' + userKeys.length + '<br><br>' +
+                    '<strong>Now you can test with fresh data!</strong>';
+                
+                console.log('✅ All user data cleared successfully');
+                
+            } catch (error) {
+                console.error('❌ Error clearing user data:', error);
+                debugOutput.innerHTML = '<span style="color: red;">❌ Error clearing user data: ' + error.message + '</span>';
+            }
+        }
+        
+        // Test existing user functionality
+        function testExistingUser() {
+            const debugOutput = document.getElementById('debugOutput');
+            const testEmail = 'test@example.com';
+            
+            console.log('🧪 Testing existing user functionality...');
+            
+            // First, check if user exists
+            const existingUser = checkExistingUser(testEmail);
+            
+            if (existingUser.exists) {
+                debugOutput.innerHTML = '<span style="color: green;">✅ Existing user found!</span><br>' +
+                    '<strong>Email:</strong> ' + testEmail + '<br>' +
+                    '<strong>User ID:</strong> ' + existingUser.userId + '<br>' +
+                    '<strong>Name:</strong> ' + (existingUser.userName || 'Not set') + '<br>' +
+                    '<strong>Account ID:</strong> ' + (existingUser.accountId || 'Not set') + '<br>' +
+                    '<strong>Account Name:</strong> ' + (existingUser.accountName || 'Not set');
+                
+                console.log('✅ Existing user test successful:', existingUser);
+            } else {
+                // Create a test user
+                const testUserId = 'test_user_' + Date.now();
+                localStorage.setItem('thrivestack_user_email_' + testEmail, testUserId);
+                localStorage.setItem('thrivestack_user_name', 'Test User');
+                localStorage.setItem('thrivestack_account_id', 'test_account_123');
+                localStorage.setItem('thrivestack_account_name', 'Test Account');
+                
+                debugOutput.innerHTML = '<span style="color: blue;">🆕 Test user created!</span><br>' +
+                    '<strong>Email:</strong> ' + testEmail + '<br>' +
+                    '<strong>User ID:</strong> ' + testUserId + '<br>' +
+                    '<strong>Name:</strong> Test User<br>' +
+                    '<strong>Account ID:</strong> test_account_123<br>' +
+                    '<strong>Account Name:</strong> Test Account<br><br>' +
+                    '<strong>Now test again to see existing user detection!</strong>';
+                
+                console.log('🆕 Test user created:', { testEmail, testUserId });
+            }
+        }
+        
         // Test setUser and setGroup functionality
         function testSetUserAndGroup() {
             const debugOutput = document.getElementById('debugOutput');
@@ -1197,6 +1301,35 @@ source="marketing,product">
             } else {
                 console.error('❌ ThriveStack not available for testing');
                 debugOutput.innerHTML = '<span style="color: red;">❌ ThriveStack not available</span>';
+            }
+        }
+        
+        // Check if user already exists
+        function checkExistingUser(email) {
+            const existingUserId = localStorage.getItem('thrivestack_user_email_' + email);
+            if (existingUserId) {
+                const userName = localStorage.getItem('thrivestack_user_name');
+                const accountId = localStorage.getItem('thrivestack_account_id');
+                const accountName = localStorage.getItem('thrivestack_account_name');
+                
+                console.log('🔍 Existing user found:', {
+                    email: email,
+                    userId: existingUserId,
+                    userName: userName,
+                    accountId: accountId,
+                    accountName: accountName
+                });
+                
+                return {
+                    exists: true,
+                    userId: existingUserId,
+                    userName: userName,
+                    accountId: accountId,
+                    accountName: accountName
+                };
+            } else {
+                console.log('🆕 No existing user found for email:', email);
+                return { exists: false };
             }
         }
         
