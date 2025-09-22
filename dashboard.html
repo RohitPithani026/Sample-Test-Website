@@ -937,7 +937,7 @@ source="product">
         
         // Set group data in ThriveStack
         function setThriveStackGroup() {
-            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            const thriveStack = window.ThriveStack;
             
             if (thriveStack) {
                 // Example group data - customize with your actual values
@@ -946,16 +946,15 @@ source="product">
                 const groupName = 'Your Company Name'; // Your company name
                 
                 if (typeof thriveStack.setGroup === 'function') {
-                    // setGroup(userId, accountId, accountName, properties)
-                    // We need a userId here, so we'll get it from localStorage
+                    // setGroup(groupId, accountDomain, accountName, properties)
                     const userId = localStorage.getItem('thrivestack_user_id');
                     if (userId) {
-                        thriveStack.setGroup(userId, groupId, groupName, {
-                            account_domain: groupDomain,
-                            source: "dashboard_access",
-                            last_updated: new Date().toISOString()
+                        thriveStack.setGroup(groupId, groupDomain, groupName, {
+                            plan_name: "Enterprise",
+                            employee_count: 150,
+                            source: "dashboard_initialization"
                         });
-                        console.log('✅ ThriveStack group data set:', { userId, groupId, groupDomain, groupName });
+                        console.log('✅ ThriveStack group data set:', { groupId, groupDomain, groupName });
                     } else {
                         console.log('ℹ️ No userId available for setGroup');
                     }
@@ -1007,7 +1006,7 @@ source="product">
         }
         
         // Track dashboard engagement with ThriveStack
-        const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+        const thriveStack = window.ThriveStack;
         
         if (thriveStack) {
             // Set user data if available from signup
@@ -1070,7 +1069,7 @@ source="product">
         
         // Helper function to track feature usage
         function trackFeatureUsage(featureName, userRole = 'user', additionalProps = {}) {
-            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            const thriveStack = window.ThriveStack;
             const userId = localStorage.getItem('thrivestack_user_id');
             const accountId = localStorage.getItem('thrivestack_account_id');
             
@@ -1221,7 +1220,7 @@ source="product">
                 // Simulate invitation sending
                 setTimeout(() => {
                     // Track the invitation with ThriveStack
-                    const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+                    const thriveStack = window.ThriveStack;
                     const userId = localStorage.getItem('thrivestack_user_id');
                     const accountId = localStorage.getItem('thrivestack_account_id');
                     
@@ -1281,11 +1280,11 @@ source="product">
             const debugOutput = document.getElementById('debugOutput');
             let status = '<h5>🔍 ThriveStack Status:</h5>';
             
-            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            const thriveStack = window.ThriveStack;
             
             if (thriveStack) {
                 status += '<span style="color: green;">✅ ThriveStack object exists</span><br>';
-                status += '<strong>Reference used:</strong> ' + (window.thriveStackRef ? 'thriveStackRef' : window.thriveStack ? 'thriveStack' : 'thrivestack') + '<br>';
+                status += '<strong>Reference used:</strong> ThriveStack<br>';
                 status += '<strong>Available methods:</strong> ' + Object.keys(thriveStack).join(', ') + '<br>';
                 status += '<strong>Track method:</strong> ' + (typeof thriveStack.track === 'function' ? '✅ Available' : '❌ Missing') + '<br>';
                 
@@ -1305,7 +1304,7 @@ source="product">
             } else {
                 status += '<span style="color: red;">❌ ThriveStack object not found</span><br>';
                 status += '<strong>Available references:</strong><br>';
-                status += '- thriveStackRef: ' + (window.thriveStackRef ? '✅ Found' : '❌ Not found') + '<br>';
+                status += '- ThriveStack: ' + (window.ThriveStack ? '✅ Found' : '❌ Not found') + '<br>';
                 status += '- thriveStack: ' + (window.thriveStack ? '✅ Found' : '❌ Not found') + '<br>';
                 status += '- thrivestack: ' + (window.thrivestack ? '✅ Found' : '❌ Not found') + '<br>';
             }
@@ -1340,7 +1339,7 @@ source="product">
         // Test ThriveStack basic functionality
         function testThriveStack() {
             const debugOutput = document.getElementById('debugOutput');
-            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            const thriveStack = window.ThriveStack;
             
             if (thriveStack && typeof thriveStack.track === 'function') {
                 try {
@@ -1370,7 +1369,7 @@ source="product">
             const debugOutput = document.getElementById('debugOutput');
             console.log('🧪 Testing setUser and setGroup from dashboard...');
             
-            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            const thriveStack = window.ThriveStack;
             
             if (thriveStack) {
                 const userId = localStorage.getItem('thrivestack_user_id') || 'test_user_' + Date.now();
@@ -1404,7 +1403,7 @@ source="product">
                 // Test setGroup
                 if (typeof thriveStack.setGroup === 'function') {
                     try {
-                        thriveStack.setGroup(userId, accountId, accountName, {
+                        thriveStack.setGroup(accountId, 'test-domain.com', accountName, {
                             plan_name: "Test Plan",
                             employee_count: 1,
                             source: "dashboard_debug",
@@ -1470,7 +1469,7 @@ source="product">
             const debugOutput = document.getElementById('debugOutput');
             console.log('🧪 Testing virality tracking from dashboard...');
             
-            const thriveStack = window.thriveStackRef || window.thriveStack || window.thrivestack;
+            const thriveStack = window.ThriveStack;
             const userId = localStorage.getItem('thrivestack_user_id');
             const accountId = localStorage.getItem('thrivestack_account_id');
             
